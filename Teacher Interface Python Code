@@ -12,22 +12,17 @@ class PredictorChatbotApp:
         self.root = root
         self.root.title("Learning Style and Chatbot Tool")
 
-     
         upload_button = tk.Button(self.root, text="Upload Data for Prediction", command=self.upload_data)
         upload_button.pack(pady=10)
 
-        # Button to upload and analyze learning styles
         analyze_styles_button = tk.Button(self.root, text="Upload and Analyze Learning Styles", command=self.upload_and_analyze)
         analyze_styles_button.pack(pady=10)
 
-        # Button for asking GPT questions
         chat_button = tk.Button(self.root, text="Ask GPT", command=self.ask_gpt)
         chat_button.pack(pady=10)
 
-       
         self.model = self.load_lstm_model()
 
-        # Set your OpenAI API key here (ensure you keep this key secure)
         openai.api_key = 'Enter API Key'  
 
     def load_lstm_model(self):
@@ -58,10 +53,8 @@ class PredictorChatbotApp:
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls")])
         if file_path:
             try:
-                # Load data, ensuring the correct decimal handling
                 data = pd.read_excel(file_path, decimal=',') 
                 results = self.analyze_styles(data)
-                # Display the results
                 info_message = "\n".join([f"{dim}: {res['High']}, {res['Low']}" for dim, res in results.items()])
                 messagebox.showinfo("Learning Style Percentages", info_message)
             except Exception as e:
