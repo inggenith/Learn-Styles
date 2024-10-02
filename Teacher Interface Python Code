@@ -1,29 +1,54 @@
 import numpy as np
 import pandas as pd
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import filedialog, messagebox, simpledialog, ttk
 from tensorflow.keras.models import load_model
 from tensorflow.keras.losses import MeanSquaredError
-
 import openai
+import requests
 
 class PredictorChatbotApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Learning Style and Chatbot Tool")
+        self.root.geometry("600x500")  # Increased window size for better layout
+        self.root.configure(bg="#E3F2FD")  # Light blue background
 
-        upload_button = tk.Button(self.root, text="Upload Data for Prediction", command=self.upload_data)
-        upload_button.pack(pady=10)
+        style = ttk.Style()
+        style.theme_use("clam")  # Use 'clam' theme for a modern look
+        style.configure("TButton", font=("Arial", 12), padding=10, background="#1E88E5", foreground="white")
+        style.configure("TLabel", font=("Arial", 12), background="#E3F2FD", foreground="#0D47A1")
+        style.configure("TFrame", background="#E3F2FD")
+        style.configure("TCombobox", font=("Arial", 12), padding=5)
 
-        analyze_styles_button = tk.Button(self.root, text="Upload and Analyze Learning Styles", command=self.upload_and_analyze)
-        analyze_styles_button.pack(pady=10)
+        api_frame = ttk.Frame(self.root, padding="10")
+        api_frame.pack(fill='x', pady=(10, 0))
+        api_label = ttk.Label(api_frame, text="Select API for Chat:")
+        api_label.pack(side='left', padx=10)
+        self.api_option = tk.StringVar(value="OpenAI")
+        self.api_dropdown = ttk.Combobox(api_frame, textvariable=self.api_option, values=[
+            "OpenAI", "Hugging Face", "GPT-J", "Cohere", "TextSynth", "LLaMA 3", "OLMo"
+        ])
+        self.api_dropdown.pack(side='left', padx=10)
 
-        chat_button = tk.Button(self.root, text="Ask GPT", command=self.ask_gpt)
-        chat_button.pack(pady=10)
+        data_frame = ttk.Frame(self.root, padding="10")
+        data_frame.pack(fill='x', pady=(10, 0))
+        upload_button = ttk.Button(data_frame, text="Upload Data for Prediction", command=self.upload_data)
+        upload_button.pack(pady=5)
 
-        self.model = self.load_lstm_model()
+        analyze_frame = ttk.Frame(self.root, padding="10")
+        analyze_frame.pack(fill='x', pady=(10, 0))
+        analyze_styles_button = ttk.Button(analyze_frame, text="Upload and Analyze Learning Styles", command=self.upload_and_analyze)
+        analyze_styles_button.pack(pady=5)
 
-        openai.api_key = 'Enter API Key'  
+        chat_frame = ttk.Frame(self.root, padding="10")
+        chat_frame.pack(fill='x', pady=(10, 0))
+        chat_button = ttk.Button(chat_frame, text="Ask GPT", command=self.ask_gpt)
+        chat_button.pack(pady=5)
+
+        self.model = C:\\Users\\X\\OneDrive - UNED\\Documentos\\LSTM_model.h5
+
+        openai.api_key = 'Enter API'
 
     def load_lstm_model(self):
         model_path = "C:\\Users\\X\\OneDrive - UNED\\Documentos\\LSTM_model.h5"
@@ -53,8 +78,10 @@ class PredictorChatbotApp:
         file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls")])
         if file_path:
             try:
+                # Load data, ensuring the correct decimal handling
                 data = pd.read_excel(file_path, decimal=',') 
                 results = self.analyze_styles(data)
+                # Display the results
                 info_message = "\n".join([f"{dim}: {res['High']}, {res['Low']}" for dim, res in results.items()])
                 messagebox.showinfo("Learning Style Percentages", info_message)
             except Exception as e:
@@ -62,7 +89,7 @@ class PredictorChatbotApp:
 
     def analyze_styles(self, data):
         thresholds = {
-            'AR': (0.6, 'Active', 0.4, 'Reflexive'),
+            'AR': (0.6, 'Active', 0.4, 'Reflective'),
             'SI': (0.6, 'Sequential', 0.4, 'Intuitive'),
             'VB': (0.6, 'Visual', 0.4, 'Verbal'),
             'SG': (0.6, 'Sequential', 0.4, 'Global')
@@ -81,14 +108,55 @@ class PredictorChatbotApp:
     def ask_gpt(self):
         question = simpledialog.askstring("Question", "What do you want to ask?")
         if question:
+            api_choice = self.api_option.get()
             try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "system", "content": "You are helpful."}, {"role": "user", "content": question}]
-                )
-                messagebox.showinfo("GPT Response", response.choices[0].message['content'])
+                if api_choice == "OpenAI":
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{"role": "system", "content": "You are helpful."}, {"role": "user", "content": question}]
+                    )
+                    response_text = response.choices[0].message['content']
+                elif api_choice == "Hugging Face":
+                    response_text = self.ask_hugging_face(question)
+                elif api_choice == "GPT-J":
+                    response_text = self.ask_gpt_j(question)
+                elif api_choice == "Cohere":
+                    response_text = self.ask_cohere(question)
+                elif api_choice == "TextSynth":
+                    response_text = self.ask_textsynth(question)
+                elif api_choice == "LLaMA 3":
+                    response_text = self.ask_llama3(question)
+                elif api_choice == "OLMo":
+                    response_text = self.ask_olmo(question)
+                else:
+                    response_text = "API not supported."
+                messagebox.showinfo("Response", response_text)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to fetch response: {str(e)}")
+
+    def ask_hugging_face(self, question):
+        # Example: Replace with actual Hugging Face API call
+        return f"Simulated response from Hugging Face for: {question}"
+
+    def ask_gpt_j(self, question):
+        # Example: Replace with actual GPT-J API call
+        return f"Simulated response from GPT-J for: {question}"
+
+    def ask_cohere(self, question):
+        # Example: Replace with actual Cohere API call
+        return f"Simulated response from Cohere for: {question}"
+
+    def ask_textsynth(self, question):
+        # Example: Replace with actual TextSynth API call
+        return f"Simulated response from TextSynth for: {question}"
+
+    def ask_llama3(self, question):
+        # Placeholder for L3 integration
+        return f"Simulated response from LLaMA 3 for: {question}"
+
+    def ask_olmo(self, question):
+        # Placeholder for OLMo integration
+        return f"Simulated response from OLMo for: {question}"
 
 if __name__ == '__main__':
     root = tk.Tk()
