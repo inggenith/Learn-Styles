@@ -46,12 +46,14 @@ class PredictorChatbotApp:
         chat_button = ttk.Button(chat_frame, text="Ask GPT", command=self.ask_gpt)
         chat_button.pack(pady=5)
 
-        self.model = C:\\Users\\X\\OneDrive - UNED\\Documentos\\LSTM_model.h5
+        self.model = self.load_lstm_model()
 
-        openai.api_key = 'Enter API'
+        # Set your OpenAI API key here (ensure you keep this key secure)
+        openai.api_key = 'your-openai-api-key'  # Use your actual OpenAI API key
 
     def load_lstm_model(self):
-        model_path = "C:\\Users\\X\\OneDrive - UNED\\Documentos\\LSTM_model.h5"
+        # Update the path to your LSTM model
+        model_path = r"C:\Users\X\OneDrive\software\my_lstm_model.keras"
         return load_model(model_path, custom_objects={'mse': MeanSquaredError()})
 
     def upload_data(self):
@@ -134,6 +136,7 @@ class PredictorChatbotApp:
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to fetch response: {str(e)}")
 
+    # Replace these with real API calls
     def ask_hugging_face(self, question):
         # Example: Replace with actual Hugging Face API call
         return f"Simulated response from Hugging Face for: {question}"
